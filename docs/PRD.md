@@ -1,32 +1,33 @@
-# PRD — Slides Made Easy
+# PRD — PPT Slides Made Easy
 
 ## Problem
-Creating a good presentation takes too long — researching content, structuring slides, and designing layouts are three separate jobs done in three separate tools.
+Creating presentation slides for lectures, classes, and business pitches is slow. Teachers, coaches, and executives spend hours researching content and fighting with design tools instead of presenting.
 
 ## Target User
-Teachers, coaches, and top executives who need a clean presentation fast and currently lose hours to design tools or heavy research.
+Coaches, teachers, and top executives who need quality slide content with a clean layout — fast.
 
 ## Core Objects
-- **Presentation** — a deck with a title, topic, audience, and tone.
-- **Slide** — one slide: title, body content, speaker notes, layout type, slide number.
-- **Design Template** — a reusable pairing of fonts, colours, and layout style.
+- **Presentation** — title, audience, purpose, tone, slide_count
+- **Slide** — order, layout_type, content blocks (heading, bullets, image_desc), notes
+- **Theme** — font, primary/secondary/accent colours, layout template
+- **ContentDraft** — AI-generated slide content (value + source + confidence + review_status)
 
-## MVP (v1) — Checklist
-- [ ] Enter a topic + audience + tone → generate a full slide deck (content per slide).
-- [ ] AI-generated content stored with source, confidence, review_status.
-- [ ] Pick / change a design template (font + colour + layout) applied across all slides.
-- [ ] Edit any slide's title, body, and notes inline — persists to DB.
-- [ ] Add, reorder, and delete slides.
-- [ ] Preview the deck as a clean slide view.
-- [ ] Export to a downloadable format (PDF or PPTX stub).
-- [ ] All screens viewable without login (seeded demo deck on first load).
+## MVP (v1) — Must-Haves
+- [ ] Create a presentation with title + audience + purpose
+- [ ] Auto-generate slide-by-slide content from the presentation brief
+- [ ] Pick or auto-apply a theme (font + colours + layout)
+- [ ] Edit slide content inline (heading, bullets, notes)
+ [ ] Reorder slides
+- [ ] Export to a printable slide preview (rendered HTML, one slide per page)
+- [ ] All above viewable without login (seeded demo data, no auth wall)
 
-## Non-goals (v1)
-- Complex multi-column or animated layouts.
-- Text-heavy slides (keep slides lean — max ~5 bullets).
-- User accounts / login / per-user isolation (later sprint).
-- Real-time collaborative editing.
-- Image generation or stock-photo search.
+## Non-Goals (v1)
+- Complex multi-element design (shapes, animations, transitions)
+- Text-heavy slides with long paragraphs
+- Real-time collaboration / multi-user editing
+- Export to .pptx file format
+- Image generation or stock photo search
+- Billing / paid tiers
 
 ## Success Criteria
-A teacher types "Photosynthesis for 8th grade" with tone "classroom lecture", gets a 8-slide deck with correct structured content and a clean applied design, edits one bullet, changes the colour template, and exports a PDF — all without leaving the app and without signing in.
+A coach types "Sales enablement for SaaS startup, 10 slides, persuasive" → the app generates 10 slides with headings + bullet points + speaker notes, applies a clean theme, and the coach edits content and exports a printable preview — in under 5 minutes, no design tool opened.

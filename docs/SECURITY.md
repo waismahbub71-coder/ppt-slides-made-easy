@@ -1,23 +1,24 @@
 # Security
 
 ## Secret Handling
-- OpenAI API key stored in server-side env (`OPENAI_API_KEY`). Never exposed to the client. All AI calls happen in server actions or `lib/ai/`.
-- Supabase service key in server env only; anon key in client is safe.
-- No secrets in `.env.local` committed to repo.
+- OpenAI API key stored in environment variables (server-side only)
+- Never exposed in frontend code or client bundles
+- Supabase service key server-side only; anon key in NEXT_PUBLIC_
 
 ## Permission Model
-- **v1 (demo-first)**: permissive RLS — all tables readable/writable by anyone so the app works without login. Seeded demo decks visible to all.
-- **Lock-down sprint**: replace with owner-scoped policies (`auth.uid() = user_id`). Presentations + slides visible only to their owner. Templates remain shared read-only.
+- v1: permissive RLS (demo works without login)
+- Lock-down sprint: owner-scoped (`auth.uid() = user_id`) on all tables
+- AI inherits the calling user's permissions — no elevated access
 
-## Approved-Tools Rule
-- Only named, server-side tools in `lib/ai/` and `lib/actions/` may call external services.
-- No raw `eval`, `exec`, or arbitrary HTTP calls from the client.
-- AI calls use a single `generate_deck_content` function with a strict output schema; invalid output is retried once then routed to manual entry.
+## Approved Tools Rule
+- Only named server-side functions interact with AI or DB
+- No raw `eval`, no arbitrary code execution
+- Structured errors: retryable vs terminal, human-readable reason
 
 ## Audit Principle
-Every meaningful action (generate, apply template, export, delete) is logged with tool name, input summary, and timestamp.
+Every content generation, theme application, and slide edit is logged. Admin can trace who did what and when.
 
-## What Could NOT Be Verified
-- Rate limiting on AI generation (add in lock-down sprint).
-- XSS on user-entered slide content — v1 renders as plain text; if rich text added later, needs sanitisation.
-- npm audit — run before lock-down sprint.
+## What Could NOT Be Verified (v1)
+- Rate-limiting on AI calls (add in lock-down sprint)
+- PII scrubbing on user briefs (assess in later sprint)
+- Prompt-injection hardening (basic validation in v1, full pass later)

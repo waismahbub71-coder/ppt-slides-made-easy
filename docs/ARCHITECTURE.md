@@ -1,48 +1,55 @@
 # Architecture
 
 ## Stack
-- **Next.js (App Router)** — UI, server actions, routing.
-- **Supabase (Postgres)** — database, RLS.
-- **Vercel** — deployment.
-- **AI content generation** — OpenAI API (server-side only, key never in frontend).
+- **Next.js** (App Router) + **Supabase** (Postgres + RLS) + **Vercel** deploy
+- AI: OpenAI API (server-side only)
 
-## Key User Action Flow
-1. User enters topic + audience + tone on the home screen.
-2. Server action calls AI module → returns structured slide content (JSON).
-3. Content saved to `slides` table with `source`, `confidence`, `review_status`.
-4. Default design template applied to the new presentation.
-5. Deck editor renders slides in editable fields + live slide preview.
-6. User edits slides, changes template, reorders — each change persists.
-7. User exports → server generates PDF → download starts.
+## Core Flow (one user action)
+1. User creates a presentation brief (title, audience, purpose, slide_count)
+2. Server calls AI to generate slide-by-slide content → stored as ContentDraft rows
+3. User picks / AI auto-assigns a Theme (font + colours + layout)
+4. Slides render in editable preview — user edits headings/bullets/notes inline
+5. User reorders slides, exports printable preview
+6. Every save persists to Supabase; refresh shows same state
 
 ## Nav Shell
-Desktop: persistent left sidebar (Decks, Templates, Export). Mobile: hamburger menu.
+Persistent left sidebar on desktop (Presentations, Themes), collapses to hamburger on mobile. Current section highlighted.
 
-## Layer Order (what to build first)
-1. **Data** — tables, seed data, data-access layer (`lib/data/`).
-2. **App logic** — CRUD for presentations + slides, inline editing, reordering.
-3. **Smart features** — AI content generation (`lib/ai/`), template application, export.
+## Build Order
+1. Database tables + RLS (permissive v1) + seed data
+2. Data-access layer (`lib/data/`) — all DB reads/writes
+3. Presentation CRUD UI (create, list, edit slides)
+4. Inline slide editor + reorder
+5. Theme picker + printable export
+6. AI content generation (server-side `lib/ai/`)
+7. Auth + owner-scoped RLS (later sprint)
 
-The core (create deck, edit slides, change template) runs without the AI — a user can build a deck manually and apply a template with zero AI calls. AI fills content faster but isn't required for the engine to work.
+## Why Core Works Without AI
+Slides can be created and edited manually. AI auto-fill is an enhancement; the app is fully functional with blank slides typed by hand.
 
 ## Repo Structure
 ```
-app/                    # routes + pages
-  decks/                 # deck list + editor
-  templates/             # template gallery
-components/              # UI components (SlideEditor, DeckPreview, etc.)
-lib/data/                # ALL DB reads/writes — single data-access layer
-lib/ai/                  # AI content generation + confidence scoring
-lib/export/              # PDF/PPTX generation
-lib/actions/             # server actions
-__tests__/               # tests beside code
+src/
+  app/
+    (presentations)/  — list + editor pages
+    (themes)/         — theme browser
+    components/        — shared UI
+  features/
+    presentations/    — components + logic
+    slides/           — slide editor + reorder
+    themes/           — theme picker
+  lib/
+    data/             — all DB access (one place)
+    ai/               — content generation
+    server/           — server actions
+  test/               — beside code
 ```
 
 ## Module Map
-| Module | Responsibility | Owns | Build order |
+| Module | Owns | Data | Build Order |
 |---|---|---|---|
-| decks | Presentation CRUD + deck editor | presentations table | 1st |
-| slides | Slide content, reordering, inline edit | slides table | 1st (after decks) |
-| templates | Design templates (font/colour/layout) | design_templates table | 2nd |
-| content-gen | AI content generation per deck brief | slides AI fields | 2nd |
-| export | Download deck as PDF | n/a (reads slides) | 3rd |
+| presentations | list + create + brief | presentations table | 1 |
+| slides | edit + reorder + render | slides table | 2 |
+| themes | pick + apply | themes table | 3 |
+| ai-content | generate content | content_drafts table | 4 |
+| auth | login + RLS lockdown | user_id scoping | 5 |

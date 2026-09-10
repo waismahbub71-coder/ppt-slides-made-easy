@@ -1,45 +1,52 @@
 # Tasks
 
-## Sprint 1 — Core Engine (DB + Deck CRUD)
-**Goal:** A user can create a deck, add/edit/delete/reorder slides, and see a live preview — no AI, no login.
-- [ ] Create Supabase tables + seed data + RLS (permissive v1).
-- [ ] Build `lib/data/` data-access layer for presentations + slides + templates.
-- [ ] Deck list page (home) — shows seeded + created decks.
-- [ ] Deck editor — create deck from form (title, topic, audience, tone).
-- [ ] Slide editor — add/edit/delete/reorder slides; inline fields persist.
-- [ ] Live slide preview pane.
-- [ ] Template picker — switch font/colour across deck (seeded templates).
-- [ ] Responsive sidebar nav (desktop) / hamburger (mobile).
-- **Definition of Done:** User creates a deck manually, adds 5 slides by hand, applies a template, and sees the preview update — all persisted to the DB.
+## Sprint 1 — Database + Core Presentation CRUD
+**Goal:** Presentations + slides + themes tables, seeded, viewable without login.
+- [ ] Create Supabase tables (presentations, slides, themes, content_drafts) with permissive RLS + seed data
+- [ ] `lib/data/` — typed access functions for all CRUD
+- [ ] Presentations list page (sidebar shell, seed data visible)
+- [ ] Create presentation form (title, audience, purpose, tone, slide_count)
+- [ ] Presentation detail with slide list
+- [ ] Inline slide editor (heading, bullets, notes — editable, persists)
+- [ ] Slide reorder (drag or up/down)
+- [ ] Theme picker — apply theme to presentation
+- [ ] Printable export view (one slide per page)
+**DoD:** A user creates a presentation, adds/edits/reorders slides, picks a theme, and exports a printable preview — all without logging in.
 
-## Sprint 2 — AI Content Generation (**v1 functional milestone**)
-**Goal:** User types a topic and gets a full structured deck.
-- [ ] Build `lib/ai/generate_deck_content.ts` — strict JSON schema, retry on failure.
-- [ ] Wire generate button → server action → save slides with ai_source/confidence/review_status.
-- [ ] Low-confidence slides flagged in editor with review badge.
-- [ ] Edit AI-generated content inline (same editor as manual).
-- **Definition of Done:** User types "Photosynthesis for 8th grade", gets 8 slides with structured content + confidence scores, edits one bullet — the success scenario works end-to-end.
+## Sprint 2 — AI Content Generation (v1 functional milestone)
+**Goal:** Brief → auto-generated slides working end-to-end.
+- [ ] `lib/ai/` — generate_slide_content server function
+- [ ] "Generate slides" button on presentation create
+- [ ] ContentDraft storage with value+source+confidence+review_status
+- [ ] Low-confidence flagging + human review UI
+- [ ] Auto-assign theme based on tone
+- [ ] Slide preview with theme styling (font + colours)
+**DoD:** User types a brief, clicks generate, gets populated slides with correct theme — editable and exportable.
 
-## Sprint 3 — Export + Polish
-**Goal:** User can export the deck.
-- [ ] Build `lib/export/` — generate PDF from current slides + template.
-- [ ] Export button → server action → file download.
-- [ ] Handle empty deck / empty slide states.
-- [ ] Error + loading states on all screens.
-- **Definition of Done:** User exports a finished deck as PDF and the file opens correctly.
+## Sprint 3 — Polish + Edge Cases
+**Goal:** Handle empty/error/loading states everywhere.
+- [ ] Loading skeletons on all async ops
+- [ ] Empty states (no presentations, no slides)
+- [ ] Error boundaries + retry on AI failure
+- [ ] Validation on form inputs
+- [ ] Theme styling applied to printable export
+**DoD:** Every screen handles loading, empty, and error gracefully; no dead-ends.
 
 ## Sprint 4 — Lock It Down
-**Goal:** Real users, per-user data, security pass.
-- [ ] Add auth (Supabase auth) — login/signup.
-- [ ] Replace permissive RLS with owner-scoped policies (`auth.uid() = user_id`).
-- [ ] Templates remain shared read-only.
-- [ ] Security pass: XSS, injection, npm audit, rate-limit AI.
-- **Definition of Done:** Logged-out user sees demo deck; logged-in user sees only their own decks.
+**Goal:** Auth + owner-scoped data isolation.
+- [ ] Login/signup (email + OAuth)
+- [ ] Replace permissive RLS with owner-scoped policies
+- [ ] user_id populated on all new rows
+- [ ] Rate-limiting on AI calls
+- [ ] Security pass (injection, XSS, PII, prompt-injection)
+**DoD:** Logged-in user sees only their presentations; anonymous user can still see a demo but cannot edit.
 
 ## Gantt
 ```
-Sprint 1  ████  Core engine (DB + CRUD)
-Sprint 2  ████  AI content generation
-Sprint 3  ████  Export + polish
-Sprint 4  ████  Lock-down (auth + RLS)
+S1: ████████ DB + CRUD + slide editor + export
+S2: ████████ AI generation + theme styling
+S3: ████ Edge cases + polish
+S4: ████ Auth + RLS lockdown + security
 ```
+
+**First works end-to-end:** end of Sprint 2 (v1 functional milestone)

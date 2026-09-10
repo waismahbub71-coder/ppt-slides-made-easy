@@ -1,29 +1,28 @@
 # Test Plan
 
-## Success Scenario (v1)
-1. Open the app — see the deck list with seeded demo deck ("Photosynthesis").
-2. Click "New Deck" — enter title "Climate Change", topic "climate science", audience "high school", tone "classroom lecture".
-3. Click "Generate" — wait for loading state — 8 slides appear with content + confidence badges.
-4. Click a slide — edit the body content inline — save persists.
-5. Open template picker — switch to "Boardroom Blue" — all slides update colours.
-6. Click "Export" — PDF downloads and opens.
+## v1 Success Scenario (manual)
+1. Open app — see demo presentations in sidebar (no login)
+2. Click "New Presentation" → enter: title "Q3 Investor Pitch", audience "Investors", purpose "Fundraise", tone "persuasive", slide_count 8
+3. Click "Generate Slides" → 8 slides appear with headings + bullets + notes
+4. Click a slide → edit heading and a bullet → changes persist on refresh
+5. Drag slide 3 to position 1 → order updates
+6. Pick "Corporate Bold" theme → font + colours applied to all slides
+7. Click "Export" → printable view opens, one slide per page
+8. Verify: all data visible after refresh
 
 ## Empty States
-- **No decks**: Deck list shows "No decks yet — create one to get started" with a CTA button.
-- **Empty deck**: Editor shows "This deck has no slides yet — add one or generate from a topic."
-- **Empty slide body**: Preview shows "Click to add content."
+- No presentations → show "Create your first presentation" CTA
+- No slides in a presentation → show "Add or generate slides"
+- No themes → fallback to default theme
 
-## Error States
-- **AI generation fails**: Show "Couldn't generate content — try again or add slides manually." Retry button. Manual add still works.
-- **AI returns invalid JSON**: Retry once, then fall back to manual entry. No crash.
-- **DB write fails**: Inline save shows "Save failed — retry" on the field.
-- **Export fails**: "Export failed — try again" toast.
+## Error Cases
+- AI generation fails → show error + retry button
+- DB write fails → toast with error, form stays populated
+- Invalid slide_count (0 or >30) → validation message, no submission
+- Network offline → graceful error, no silent failure
 
-## Loading States
-- **Generating**: Button shows spinner + "Generating slides…" — other UI remains interactive.
-- **Saving**: Field shows subtle "Saving…" then "Saved".
-- **Exporting**: "Building your PDF…" spinner.
-
-## Permissions
-- v1: all actions work without login.
-- Lock-down: logged-out user sees demo deck only; cannot create decks without auth.
+## AI Output Validation
+- Missing heading → flag slide, user edits manually
+- Empty bullets array → flag, user adds bullets
+- Confidence < 0.5 → marked "review needed", not auto-applied
+- Malformed JSON from model → retry once, then show raw brief for manual entry

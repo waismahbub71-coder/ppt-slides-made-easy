@@ -1,39 +1,34 @@
 # Intelligence Layer
 
-## Messy Inputs
-Raw user brief: a topic string, audience string, and tone string — unstructured, varying length.
+## Messy Input
+User provides a free-text brief: title, audience, purpose, tone, slide_count.
 
 ## Auto-Structure Schema
-AI returns this JSON per deck:
 ```json
 {
-  "deck_title": "Photosynthesis",
   "slides": [
-    {
-      "title": "What is Photosynthesis?",
-      "body_content": "Plants convert sunlight into energy\nChlorophyll captures light\nProduces glucose and oxygen",
-      "speaker_notes": "Start with the big idea — plants make their own food.",
-      "layout_type": "bullet"
-    }
-  ],
-  "confidence": 0.92
+    {"heading": "Market Opportunity", "bullets": ["$50B TAM", "12% YoY growth"], "notes": "Open with the market size to frame urgency."}
+  ]
 }
 ```
 
 ## Events Tracked
-- `deck.generated` — content created, confidence + source stored per slide.
-- `slide.edited` — user manually changed AI content (flags review).
-- `template.applied` — design template changed.
+- `content.generated` — AI produced slide content
+- `content.approved` — user accepted draft
+- `content.edited` — user modified AI content
+- `theme.applied` — theme chosen for presentation
 
-## Scoring Rules (rule-based, v1)
-- **Confidence**: AI model self-report (0–1), stored per slide. Below 0.7 → `review_status = 'unreviewed'` and surfaced with a visual flag.
-- **Content quality**: `≥3 bullets and ≤6 bullets = pass`; `<3 or >6 = flag for trim`.
-- **Readability**: body_content ≤ 120 chars per slide → pass; else flag.
+## Scoring (rule-based v1)
+- Confidence = 1.0 if all slides have heading + >=1 bullet, else proportional
+- Below 0.5 → flagged for human review, not auto-applied
+- Each slide checked: heading non-empty, bullets <= 5, notes present
 
-## What Gets Ranked
-- Slides by review_status: `unreviewed` surfaced first in a review queue.
-- Templates by usage (default = most-used template for the audience/tone).
+## v1
+- Single-pass generation from brief → structured slides
+- Per-slide validation (heading + bullets + notes)
+- Low-confidence drafts flagged, editable
 
-## v1 vs Later
-- **v1**: one-shot AI generation, per-slide confidence, manual review flags.
-- **Later**: iterative refinement prompts, multi-pass structuring, per-slide layout suggestions, image search.
+## Later
+- Section-aware generation (intro/body/closing)
+- Audience-tuned tone adjustment
+- Content quality scoring across slides

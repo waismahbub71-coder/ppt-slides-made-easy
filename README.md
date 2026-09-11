@@ -1,4 +1,4 @@
-# vibe-stack-supabase
+# Presentation Slides Builder
 
 Next.js 15 + Supabase starter for shipping vibe-coded apps fast. Clone, provision, build.
 
